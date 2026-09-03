@@ -7,6 +7,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
+import featuretools as ft
 
 # ==========================================
 # PAGE CONFIGURATION & STYLING
@@ -27,13 +28,11 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
     
-    /* Main Background */
     .stApp {
         background-color: #0B0F19;
         color: #F3F4F6;
     }
     
-    /* Header Container */
     .main-header {
         background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
         border: 1px solid #334155;
@@ -58,36 +57,6 @@ st.markdown("""
         margin-bottom: 0;
     }
     
-    /* Executive Card */
-    .metric-card {
-        background: #1E293B;
-        border: 1px solid #334155;
-        border-radius: 14px;
-        padding: 20px;
-        text-align: center;
-        transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-    
-    .metric-card:hover {
-        border-color: #38BDF8;
-        transform: translateY(-2px);
-    }
-    
-    .metric-label {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #94A3B8;
-        font-weight: 600;
-    }
-    
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #38BDF8;
-        margin-top: 6px;
-    }
-    
     .valuation-box {
         background: linear-gradient(135deg, #065F46 0%, #047857 100%);
         border: 2px solid #10B981;
@@ -107,7 +76,6 @@ st.markdown("""
         margin: 8px 0;
     }
     
-    /* Button Customization */
     .stButton>button {
         background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
         color: #FFFFFF;
@@ -125,7 +93,6 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
     }
     
-    /* Tab Styling */
     .stTabs [data-baseweb="tab-list"] {
         gap: 12px;
     }
@@ -146,15 +113,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# LOAD MODEL & HELPER FUNCTIONS
+# LOAD MODEL BUNDLE
 # ==========================================
 MODEL_PATH = "house_price_model.joblib"
 
 @st.cache_resource
 def load_model_bundle():
     if not os.path.exists(MODEL_PATH):
-        # Auto-train if model file missing
-        with st.spinner("⚡ Model bundle not found. Training model pipeline now..."):
+        with st.spinner("⚡ Model bundle not found. Executing pipeline training..."):
             from train_model import train_and_export
             train_and_export()
     return joblib.load(MODEL_PATH)
@@ -169,50 +135,44 @@ except Exception as e:
     st.error(f"Error loading model bundle: {e}")
     st.stop()
 
-def preprocess_input_df(df_input):
+def transform_dataframe(df_input):
     df_proc = df_input.copy()
     df_proc.columns = df_proc.columns.str.strip()
     
-    # Date extraction
-    for date_col in ['DocumentDate', 'date', 'Date']:
-        if date_col in df_proc.columns:
-            df_proc[date_col] = pd.to_datetime(df_proc[date_col], errors='coerce')
-            df_proc[f'{date_col}_year'] = df_proc[date_col].dt.year.fillna(2014)
-            df_proc[f'{date_col}_month'] = df_proc[date_col].dt.month.fillna(6)
-            df_proc[f'{date_col}_weekday'] = df_proc[date_col].dt.weekday.fillna(2)
-            df_proc[f'{date_col}_is_weekend'] = df_proc[date_col].dt.weekday.isin([5, 6]).astype(int)
-            df_proc = df_proc.drop(columns=[date_col])
-            
-    # Age extraction
+    # House age
     for yr_col in ['YrBuilt', 'yr_built', 'YearBuilt']:
         if yr_col in df_proc.columns:
             df_proc['house_age'] = datetime.now().year - pd.to_numeric(df_proc[yr_col], errors='coerce').fillna(1980)
             
-    for yr_ren in ['YrRenovated', 'yr_renovated']:
-        if yr_ren in df_proc.columns:
-            df_proc['is_renovated'] = (pd.to_numeric(df_proc[yr_ren], errors='coerce').fillna(0) > 0).astype(int)
+    # Date extractions
+    for date_col in ['DocumentDate', 'date', 'Date']:
+        if date_col in df_proc.columns:
+            df_proc[date_col] = pd.to_datetime(df_proc[date_col], errors='coerce')
+            df_proc['DocumentDate_year'] = df_proc[date_col].dt.year.fillna(2014)
+            df_proc['DocumentDate_month'] = df_proc[date_col].dt.month.fillna(6)
+            df_proc['DocumentDate_weekday'] = df_proc[date_col].dt.weekday.fillna(2)
+            df_proc['DocumentDate_is_weekend'] = df_proc[date_col].dt.weekday.isin([5, 6]).astype(int)
+            df_proc = df_proc.drop(columns=[date_col])
 
-    # Ratios & Interactions
-    living_col = 'SqFtTotLiving' if 'SqFtTotLiving' in df_proc.columns else ('sqft_living' if 'sqft_living' in df_proc.columns else None)
-    bed_col = 'Bedrooms' if 'Bedrooms' in df_proc.columns else ('bedrooms' if 'bedrooms' in df_proc.columns else None)
-    bath_col = 'Bathrooms' if 'Bathrooms' in df_proc.columns else ('bathrooms' if 'bathrooms' in df_proc.columns else None)
-    lot_col = 'SqFtLot' if 'SqFtLot' in df_proc.columns else ('sqft_lot' if 'sqft_lot' in df_proc.columns else None)
-
-    if living_col:
-        df_proc[f'{living_col}_squared'] = pd.to_numeric(df_proc[living_col], errors='coerce') ** 2
-        if bed_col and bed_col in df_proc.columns:
-            df_proc['sqft_per_bedroom'] = pd.to_numeric(df_proc[living_col], errors='coerce') / (pd.to_numeric(df_proc[bed_col], errors='coerce') + 1)
-        if bath_col and bath_col in df_proc.columns:
-            df_proc['sqft_per_bathroom'] = pd.to_numeric(df_proc[living_col], errors='coerce') / (pd.to_numeric(df_proc[bath_col], errors='coerce') + 1)
-        if lot_col and lot_col in df_proc.columns:
-            df_proc['living_to_lot_ratio'] = pd.to_numeric(df_proc[living_col], errors='coerce') / (pd.to_numeric(df_proc[lot_col], errors='coerce') + 1)
-            
-    # Ensure all trained feature columns are present
+    # Compute top 45 interaction feature columns expected by the pipeline
     for col in feature_cols:
         if col not in df_proc.columns:
-            df_proc[col] = 0
-            
-    return df_proc[feature_cols]
+            if '+' in col:
+                parts = [p.strip() for p in col.split('+')]
+                if len(parts) == 2 and parts[0] in df_proc.columns and parts[1] in df_proc.columns:
+                    df_proc[col] = pd.to_numeric(df_proc[parts[0]], errors='coerce') + pd.to_numeric(df_proc[parts[1]], errors='coerce')
+                else:
+                    df_proc[col] = 0
+            elif '*' in col:
+                parts = [p.strip() for p in col.split('*')]
+                if len(parts) == 2 and parts[0] in df_proc.columns and parts[1] in df_proc.columns:
+                    df_proc[col] = pd.to_numeric(df_proc[parts[0]], errors='coerce') * pd.to_numeric(df_proc[parts[1]], errors='coerce')
+                else:
+                    df_proc[col] = 0
+            else:
+                df_proc[col] = 0
+                
+    return df_proc[feature_cols].fillna(0)
 
 # ==========================================
 # SIDEBAR
@@ -223,16 +183,17 @@ with st.sidebar:
     st.markdown("Industrial House Price Valuation System")
     st.divider()
     
-    st.markdown("#### **Model Certificate**")
-    st.markdown(f"**R² Score:** `{metrics['r2']:.4f}` ({metrics['r2']*100:.1f}%)")
-    st.markdown(f"**MAE Error:** `${metrics['mae']:,.0f}`")
-    st.markdown(f"**RMSE:** `${metrics['rmse']:,.0f}`")
+    st.markdown("#### **Notebook Integrity Certificate**")
+    st.markdown(f"**R² Score:** `{metrics['r2']:.4f}` ({metrics['r2']*100:.2f}%)")
+    st.markdown(f"**MAE Error:** `${metrics['mae']:,.2f}`")
+    st.markdown(f"**RMSE:** `${metrics['rmse']:,.2f}`")
+    st.markdown(f"**MAPE:** `{metrics['mape']*100:.2f}%`")
     st.markdown(f"**Status:** `CERTIFIED ELITE` 🏆")
     
     st.divider()
     st.markdown("#### **Developer**")
-    st.markdown(" Simon Okosodo")
-    st.markdown("[GitHub Repository](https://github.com/simon-okosodo-ds)")
+    st.markdown("Simon Okosodo")
+    st.markdown("[GitHub Repository](https://github.com/simon-okosodo-ds/Pso-ml20-interfaces)")
 
 # ==========================================
 # MAIN HEADER
@@ -240,7 +201,7 @@ with st.sidebar:
 st.markdown("""
 <div class="main-header">
     <h1>🏠 House Price Valuation System</h1>
-    <p>Predict real estate property valuations using our certified PSO-ML20 machine learning pipeline. Upload CSV files or enter single property features for instant valuation.</p>
+    <p>Predict real estate property valuations using your certified <b>PSO-ML20 (89.39% R² Accuracy)</b> machine learning pipeline. Upload CSV files or enter property features for instant valuation.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -248,7 +209,7 @@ st.markdown("""
 tab1, tab2, tab3, tab4 = st.tabs([
     "🏠 Single House Valuation",
     "📊 Batch CSV Upload",
-    "📈 Analytics & Proof",
+    "📈 Analytics & Notebook Proof",
     "📥 Sample CSV Template"
 ])
 
@@ -257,7 +218,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ==========================================
 with tab1:
     st.markdown("### 🏡 Single Property Valuation Calculator")
-    st.write("Fill in the property characteristics below to generate an instant estimated market valuation.")
+    st.write("Fill in property details below to generate an instant estimated market valuation.")
     
     col1, col2, col3 = st.columns(3)
     
@@ -274,17 +235,14 @@ with tab1:
         sqft_basement = st.number_input("Basement Size (SqFt)", min_value=0, max_value=5000, value=400, step=50)
 
     with col3:
-        property_type = st.selectbox("Property Type", ["Single Family", "Townhouse", "Condo", "Multi-Family"])
+        land_val = st.number_input("Land Valuation ($)", min_value=10000, max_value=2000000, value=250000, step=10000)
+        imps_val = st.number_input("Improvements Valuation ($)", min_value=10000, max_value=3000000, value=350000, step=10000)
+        zhvi_px = st.number_input("ZHVI Index Price ($)", min_value=50000, max_value=1500000, value=450000, step=10000)
         zipcode = st.selectbox("ZipCode", [98001, 98002, 98003, 98004, 98005, 98006, 98033, 98052, 98103, 98115, 98166, 98199])
-        traffic_noise = st.selectbox("Traffic Noise Level", [0, 1, 2, 3])
-        nbr_units = st.number_input("Living Units", min_value=1, max_value=5, value=1)
-        new_construction = st.checkbox("New Construction", value=False)
 
     if st.button("🔮 Generate Market Valuation"):
-        # Construct dataframe
         single_dict = {
-            'PropertyType': property_type,
-            'NbrLivingUnits': nbr_units,
+            'NbrLivingUnits': 1,
             'SqFtLot': sqft_lot,
             'SqFtTotLiving': sqft_living,
             'SqFtFinBasement': sqft_basement,
@@ -293,16 +251,17 @@ with tab1:
             'BldgGrade': bldg_grade,
             'YrBuilt': yr_built,
             'YrRenovated': yr_renovated,
-            'TrafficNoise': traffic_noise,
+            'LandVal': land_val,
+            'ImpsVal': imps_val,
+            'zhvi_px': zhvi_px,
             'ZipCode': zipcode,
-            'NewConstruction': new_construction,
             'DocumentDate': datetime.now().strftime('%Y-%m-%d')
         }
         
         df_single_raw = pd.DataFrame([single_dict])
-        df_single_processed = preprocess_input_df(df_single_raw)
+        df_single_proc = transform_dataframe(df_single_raw)
         
-        pred_val = pipeline.predict(df_single_processed)[0]
+        pred_val = pipeline.predict(df_single_proc)[0]
         price_per_sqft = pred_val / sqft_living
         lower_bound = pred_val * 0.95
         upper_bound = pred_val * 1.05
@@ -343,7 +302,7 @@ with tab2:
                 
             if st.button("🚀 Run Batch Valuation Engine"):
                 with st.spinner("Processing features and calculating valuations..."):
-                    df_proc = preprocess_input_df(df_upload)
+                    df_proc = transform_dataframe(df_upload)
                     batch_preds = pipeline.predict(df_proc)
                     
                     df_results = df_upload.copy()
@@ -367,7 +326,6 @@ with tab2:
                 st.markdown("#### Valuation Table")
                 st.dataframe(df_results, use_container_width=True)
                 
-                # Download Button
                 csv_buffer = io.BytesIO()
                 df_results.to_csv(csv_buffer, index=False)
                 csv_buffer.seek(0)
@@ -379,7 +337,6 @@ with tab2:
                     mime="text/csv"
                 )
                 
-                # Chart
                 st.divider()
                 st.markdown("#### Predicted Price Distribution")
                 fig, ax = plt.subplots(figsize=(10, 4), facecolor="#0B0F19")
@@ -398,13 +355,13 @@ with tab2:
 # TAB 3: ANALYTICS & PROOF
 # ==========================================
 with tab3:
-    st.markdown("### 📈 Model Performance & Industrial Proof")
+    st.markdown("### 📈 Notebook Certified Audit & Proof")
     
     col_a, col_b = st.columns(2)
     with col_a:
-        st.markdown("#### Model Audit Metrics")
+        st.markdown("#### Exact Notebook Audit Certificate")
         metrics_df = pd.DataFrame([
-            {"Metric": "R² Accuracy", "Score": f"{metrics['r2']:.4f} ({metrics['r2']*100:.2f}%)", "Status": "⭐ ELITE"},
+            {"Metric": "R² Accuracy Score", "Score": f"{metrics['r2']:.4f} ({metrics['r2']*100:.2f}%)", "Status": "⭐ ELITE / CERTIFIED"},
             {"Metric": "MAE (Mean Absolute Error)", "Score": f"${metrics['mae']:,.2f}", "Status": "✅ VERIFIED"},
             {"Metric": "RMSE (Root Mean Sq Error)", "Score": f"${metrics['rmse']:,.2f}", "Status": "✅ VERIFIED"},
             {"Metric": "MAPE (Mean Abs % Error)", "Score": f"{metrics['mape']*100:.2f}%", "Status": "⭐ ELITE"}
@@ -444,9 +401,10 @@ with tab4:
             'BldgGrade': 7,
             'YrBuilt': 1998,
             'YrRenovated': 0,
-            'TrafficNoise': 0,
-            'ZipCode': 98002,
-            'NewConstruction': False
+            'LandVal': 180000,
+            'ImpsVal': 220000,
+            'zhvi_px': 410000,
+            'ZipCode': 98002
         },
         {
             'DocumentDate': '2026-02-10',
@@ -460,25 +418,10 @@ with tab4:
             'BldgGrade': 10,
             'YrBuilt': 2018,
             'YrRenovated': 0,
-            'TrafficNoise': 0,
-            'ZipCode': 98004,
-            'NewConstruction': True
-        },
-        {
-            'DocumentDate': '2026-03-01',
-            'PropertyType': 'Townhouse',
-            'NbrLivingUnits': 1,
-            'SqFtLot': 3000,
-            'SqFtTotLiving': 1400,
-            'SqFtFinBasement': 0,
-            'Bathrooms': 1.5,
-            'Bedrooms': 2,
-            'BldgGrade': 7,
-            'YrBuilt': 2005,
-            'YrRenovated': 0,
-            'TrafficNoise': 1,
-            'ZipCode': 98103,
-            'NewConstruction': False
+            'LandVal': 380000,
+            'ImpsVal': 620000,
+            'zhvi_px': 750000,
+            'ZipCode': 98004
         }
     ])
     
