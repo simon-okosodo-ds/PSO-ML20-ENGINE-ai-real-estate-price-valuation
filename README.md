@@ -6,29 +6,30 @@
 [![CatBoost](https://img.shields.io/badge/CatBoost-1.2%2B-FFCC00.svg)](https://catboost.ai/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An enterprise-grade **Real Estate Valuation Web Application** powered by an advanced Gradient Boosting Machine Learning ensemble (`CatBoost` / `XGBoost`). The system features automated feature engineering, target log-transformations, batch CSV file processing with predictions download, single-property real-time valuation, and an interactive model integrity dashboard.
+An enterprise-grade **Real Estate Valuation Web Application** powered by an advanced Gradient Boosting Machine Learning ensemble (`CatBoost`, `XGBoost`, `LightGBM`). The system features automated feature engineering, target log-transformations, batch CSV file processing with predictions download, single-property real-time valuation, and an interactive model integrity dashboard.
+
+---
+
+## 🏆 Championship Tournament Leaderboard (From Notebook Audition)
+
+```text
+MODEL           | R2       | MAE          | RMSE         | MAPE    
+---------------------------------------------------------------------------
+LightGBM_Reg    | 0.8813   | $45,242      | $69,510      | 10.82%  
+XGBoost_Reg     | 0.8811   | $44,860      | $69,567      | 10.78%  
+CatBoost_Reg    | 0.8796   | $45,487      | $70,012      | 10.89%  
+```
 
 ---
 
 ## 🌟 Key Features
 
-- 🏡 **Single Property Real-Time Valuation Calculator**: Input property features (Bedrooms, Bathrooms, SqFt Living, Lot Size, Building Grade, Zipcode, Year Built) to obtain instant estimated market price ($), price per sqft ($/sqft), and 95% valuation confidence bounds.
+- 🏡 **Single Property Real-Time Valuation Calculator**: Input property features (Bedrooms, Bathrooms, SqFt Living, Lot Size, Building Grade, Zipcode, Year Built, LandVal, ImpsVal) to obtain instant estimated market price ($), price per sqft ($/sqft), and 95% valuation confidence bounds.
 - 📊 **Batch CSV Upload Engine**: Drag and drop custom housing CSV datasets to run bulk automated valuations. View interactive results tables and price distribution charts.
 - 📥 **1-Click Predictions Download**: Export batch valuation results directly into formatted CSV files.
 - 🧪 **Sample CSV Template**: Download pre-formatted sample input CSV files for instant testing.
 - 📈 **Model Integrity & Audit Dashboard**: View certified model metrics ($R^2$, MAE, RMSE, MAPE) and strategic signal hierarchy (feature importances).
 - 🎨 **Executive Obsidian UI Design**: Built with a sleek dark slate glassmorphism theme, metric cards, and responsive components.
-
----
-
-## 💎 Model Integrity Certificate
-
-| Metric | Certified Score | Status |
-| :--- | :--- | :--- |
-| **R² Score (Accuracy)** | **88.4% - 91.2%** | 🎯 `CERTIFIED ELITE` |
-| **MAE (Mean Absolute Error)** | **~$52,000** | ✅ `ROCK SOLID` |
-| **Target Pipeline** | `TransformedTargetRegressor` (Log1p / Expm1) | 🛡️ `STABLE` |
-| **Primary Estimator** | `CatBoostRegressor` / `HistGradientBoostingRegressor` | 🚀 `PRODUCTION READY` |
 
 ---
 
@@ -60,12 +61,7 @@ cd Pso-ml20-interfaces
 pip install -r requirements.txt
 ```
 
-### 3. Train the Model Pipeline (Optional - Pre-bundled)
-```bash
-python train_model.py
-```
-
-### 4. Launch the Web Application
+### 3. Launch the Web Application
 ```bash
 streamlit run app.py
 ```
@@ -77,32 +73,13 @@ streamlit run app.py
 
 To share this application live with anyone using a public shareable URL:
 
-1. Push this repository to your GitHub account (`https://github.com/simon-okosodo-ds`).
-2. Visit [Streamlit Community Cloud](https://share.streamlit.io/).
-3. Sign in with your GitHub account.
-4. Click **"New app"** and select:
+1. Visit [Streamlit Community Cloud](https://share.streamlit.io/).
+2. Sign in with your GitHub account (**simon-okosodo-ds**).
+3. Click **"New app"** and select:
    - **Repository**: `simon-okosodo-ds/Pso-ml20-interfaces`
    - **Branch**: `main`
    - **Main file path**: `app.py`
-5. Click **"Deploy!"**
-6. Within ~60 seconds, your app will be live with a permanent URL such as:
-   `https://house-price-valuation.streamlit.app`
-
----
-
-## 📋 CSV Upload Schema Specification
-
-For batch CSV uploads, the uploaded CSV can contain any of the following standard column names:
-
-- `SqFtTotLiving` / `sqft_living` (Number): Total living area in square feet
-- `Bedrooms` / `bedrooms` (Number): Number of bedrooms
-- `Bathrooms` / `bathrooms` (Number): Number of bathrooms
-- `SqFtLot` / `sqft_lot` (Number): Total lot size in square feet
-- `YrBuilt` / `yr_built` (Number): Construction year (e.g., 2005)
-- `BldgGrade` (Number): Building quality grade (1 to 13)
-- `ZipCode` (Number/String): Property postal code
-- `PropertyType` (String): e.g. Single Family, Townhouse, Condo
-- `DocumentDate` / `date` (Date): Sale date (YYYY-MM-DD)
+4. Click **"Deploy!"**
 
 ---
 
