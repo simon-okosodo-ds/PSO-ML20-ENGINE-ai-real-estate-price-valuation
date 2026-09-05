@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-FF4B4B.svg)](https://streamlit.io/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.4%2B-F7931E.svg)](https://scikit-learn.org/)
-[![R2 Accuracy](https://img.shields.io/badge/Model%20R%C2%B2-88.16%25-10B981.svg)](https://github.com/simon-okosodo-ds/ai-enterprise-real-estate-avm-engine)
+[![R2 Accuracy](https://img.shields.io/badge/Model%20R%C2%B2-88.16%25-10B981.svg)](https://github.com/simon-okosodo-ds/PSO-ML20-ENGINE-ai-real-estate-price-valuation)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > 🌐 **Live Web Application Demo:** [https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)
@@ -104,8 +104,8 @@ Because Government Tax Records (`$458k`), Neighborhood Indexes (`$425k`), and th
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/simon-okosodo-ds/Pso-ml20-interfaces.git
-cd Pso-ml20-interfaces
+git clone https://github.com/simon-okosodo-ds/PSO-ML20-ENGINE-ai-real-estate-price-valuation.git
+cd PSO-ML20-ENGINE-ai-real-estate-price-valuation
 ```
 
 ### 2. Install Dependencies
@@ -125,7 +125,7 @@ streamlit run app.py
 
 Deploy live to the web for free via [Streamlit Community Cloud](https://share.streamlit.io/):
 1. Sign in with GitHub account (**`simon-okosodo-ds`**).
-2. Select Repository: `simon-okosodo-ds/Pso-ml20-interfaces`, Branch: `main`, Main file path: `app.py`.
+2. Select Repository: `simon-okosodo-ds/PSO-ML20-ENGINE-ai-real-estate-price-valuation`, Branch: `main`, Main file path: `app.py`.
 3. Click **"Deploy!"**
 
 ---

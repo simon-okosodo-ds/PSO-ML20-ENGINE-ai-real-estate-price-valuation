@@ -266,7 +266,7 @@ with st.sidebar:
     st.divider()
     st.markdown("#### **Developer**")
     st.markdown("Simon Okosodo")
-    st.markdown("[GitHub Repository](https://github.com/simon-okosodo-ds/Pso-ml20-interfaces)")
+    st.markdown("[GitHub Repository](https://github.com/simon-okosodo-ds/PSO-ML20-ENGINE-ai-real-estate-price-valuation)")
 
 # ==========================================
 # MAIN HEADER
