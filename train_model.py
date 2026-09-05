@@ -16,11 +16,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, PowerTransformer, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, PowerTransformer, OneHotEncoder, TargetEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
-from category_encoders import TargetEncoder
-import featuretools as ft
+try:
+    import featuretools as ft
+    HAS_FEATURETOOLS = True
+except ImportError:
+    HAS_FEATURETOOLS = False
 
 try:
     from catboost import CatBoostRegressor
@@ -83,20 +86,21 @@ def train_and_export():
     top_building_blocks = importance.nlargest(200).index.tolist()
     base_cols = [c for c in top_building_blocks if '_squared' not in c and '_per_' not in c]
 
-    es = ft.EntitySet(id='automated_mining')
-    df_ft = df[base_cols].reset_index()
-    es = es.add_dataframe(dataframe_name='main_table', dataframe=df_ft, index='index')
+    if HAS_FEATURETOOLS:
+        es = ft.EntitySet(id='automated_mining')
+        df_ft = df[base_cols].reset_index()
+        es = es.add_dataframe(dataframe_name='main_table', dataframe=df_ft, index='index')
 
-    feature_matrix, _ = ft.dfs(
-        entityset=es,
-        target_dataframe_name='main_table',
-        trans_primitives=['add_numeric', 'multiply_numeric'],
-        max_depth=1,
-        verbose=False
-    )
-    df_new = feature_matrix.drop(columns=['index'], errors='ignore')
-    df = pd.concat([df, df_new], axis=1)
-    df = df.loc[:, ~df.columns.duplicated()]
+        feature_matrix, _ = ft.dfs(
+            entityset=es,
+            target_dataframe_name='main_table',
+            trans_primitives=['add_numeric', 'multiply_numeric'],
+            max_depth=1,
+            verbose=False
+        )
+        df_new = feature_matrix.drop(columns=['index'], errors='ignore')
+        df = pd.concat([df, df_new], axis=1)
+        df = df.loc[:, ~df.columns.duplicated()]
 
     print("⚖️ Strict Judge: Selecting Top 45 Predictive Signals...")
     X = df.drop(columns=[TARGET_COL], errors='ignore')
@@ -104,9 +108,9 @@ def train_and_export():
 
     X_for_judge = X.copy()
     for col in X_for_judge.columns:
-        if X_for_judge[col].dtype == 'object' or X_for_judge[col].dtype.name == 'category':
-            X_for_judge[col] = X_for_judge[col].astype('category').cat.codes
-        X_for_judge[col] = X_for_judge[col].replace([np.inf, -np.inf], np.nan).fillna(-999)
+        if not pd.api.types.is_numeric_dtype(X_for_judge[col]):
+            X_for_judge[col] = pd.Categorical(X_for_judge[col]).codes
+        X_for_judge[col] = pd.to_numeric(X_for_judge[col], errors='coerce').replace([np.inf, -np.inf], np.nan).fillna(-999)
 
     model_judge = RandomForestRegressor(n_estimators=100, max_depth=10, min_samples_leaf=5, random_state=42, n_jobs=-1)
     model_judge.fit(X_for_judge, y)

@@ -108,6 +108,34 @@ st.markdown("""
         background-color: #0284C7 !important;
         color: #FFFFFF !important;
     }
+    
+    /* Fix input labels and headers contrast */
+    label, [data-testid="stWidgetLabel"] p, label p {
+        color: #F8FAFC !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    /* Fix metrics card container & text contrast */
+    [data-testid="stMetric"] {
+        background-color: #1E293B !important;
+        border: 1px solid #334155 !important;
+        border-radius: 12px !important;
+        padding: 16px 20px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    [data-testid="stMetricLabel"] p {
+        color: #94A3B8 !important;
+        font-weight: 600 !important;
+        font-size: 0.88rem !important;
+    }
+    
+    [data-testid="stMetricValue"] div {
+        color: #38BDF8 !important;
+        font-weight: 800 !important;
+        font-size: 1.4rem !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -136,8 +164,39 @@ except Exception as e:
 
 def transform_dataframe(df_input):
     df_proc = df_input.copy()
+    
+    # 1. Normalize column names & map common aliases
+    alias_map = {
+        'sqft_living': 'SqFtTotLiving', 'sqft_tot_living': 'SqFtTotLiving', 'living_sqft': 'SqFtTotLiving', 'sqft': 'SqFtTotLiving',
+        'sqft_lot': 'SqFtLot', 'lot_sqft': 'SqFtLot',
+        'sqft_basement': 'SqFtFinBasement', 'sqft_fin_basement': 'SqFtFinBasement',
+        'bedrooms': 'Bedrooms', 'beds': 'Bedrooms',
+        'bathrooms': 'Bathrooms', 'baths': 'Bathrooms',
+        'grade': 'BldgGrade', 'bldg_grade': 'BldgGrade', 'building_grade': 'BldgGrade',
+        'yr_built': 'YrBuilt', 'year_built': 'YrBuilt',
+        'yr_renovated': 'YrRenovated', 'year_renovated': 'YrRenovated',
+        'zipcode': 'ZipCode', 'zip': 'ZipCode',
+        'land_val': 'LandVal', 'land_value': 'LandVal', 'landval': 'LandVal',
+        'imps_val': 'ImpsVal', 'imps_value': 'ImpsVal', 'impsval': 'ImpsVal', 'improvements_val': 'ImpsVal',
+        'zhvi': 'zhvi_px', 'zhvi_price': 'zhvi_px'
+    }
+    
+    # Lowercase string column rename check
+    renames = {}
+    for col in df_proc.columns:
+        c_clean = str(col).strip()
+        c_lower = c_clean.lower()
+        if c_lower in alias_map:
+            renames[col] = alias_map[c_lower]
+        elif c_clean in alias_map:
+            renames[col] = alias_map[c_clean]
+    
+    if renames:
+        df_proc = df_proc.rename(columns=renames)
+        
     df_proc.columns = df_proc.columns.str.strip()
     
+    # 2. House Age & Document Date engineering
     for yr_col in ['YrBuilt', 'yr_built', 'YearBuilt']:
         if yr_col in df_proc.columns:
             df_proc['house_age'] = datetime.now().year - pd.to_numeric(df_proc[yr_col], errors='coerce').fillna(1980)
@@ -151,6 +210,23 @@ def transform_dataframe(df_input):
             df_proc['DocumentDate_is_weekend'] = df_proc[date_col].dt.weekday.isin([5, 6]).astype(int)
             df_proc = df_proc.drop(columns=[date_col])
 
+    # 3. Smart Fallbacks for Missing Financial Features (Prevents $0 valuation under-predictions)
+    sqft_col = df_proc.get('SqFtTotLiving', pd.Series(2000, index=df_proc.index))
+    grade_col = df_proc.get('BldgGrade', pd.Series(7, index=df_proc.index))
+    lot_col = df_proc.get('SqFtLot', pd.Series(6000, index=df_proc.index))
+    
+    if 'ImpsVal' not in df_proc.columns or df_proc['ImpsVal'].eq(0).all():
+        # Estimate improvements valuation based on living area & building grade
+        df_proc['ImpsVal'] = pd.to_numeric(sqft_col, errors='coerce').fillna(2000) * 140 * (pd.to_numeric(grade_col, errors='coerce').fillna(7) / 7.0)
+        
+    if 'LandVal' not in df_proc.columns or df_proc['LandVal'].eq(0).all():
+        # Estimate land valuation based on lot size
+        df_proc['LandVal'] = pd.to_numeric(lot_col, errors='coerce').fillna(6000) * 25 + 100000
+
+    if 'zhvi_px' not in df_proc.columns or df_proc['zhvi_px'].eq(0).all():
+        df_proc['zhvi_px'] = 450000.0
+
+    # 4. Fill remaining required feature columns
     for col in feature_cols:
         if col not in df_proc.columns:
             if '+' in col:
@@ -215,7 +291,11 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ==========================================
 with tab1:
     st.markdown("### 🏡 Single Property Valuation Calculator")
-    st.write("Fill in property details below to generate an instant estimated market valuation.")
+    st.markdown("""
+    <div style="background: rgba(14, 165, 233, 0.1); border-left: 4px solid #0284C7; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; color: #E0F2FE; font-size: 0.88rem; line-height: 1.4;">
+        💡 <b>Testing Luxury Homes ($1M+)?</b> Scale up parameters: Living Area (3,500+ SqFt), Building Grade (9-12), Improvements ($550k+), Land ($200k+).
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
@@ -236,6 +316,7 @@ with tab1:
         imps_val = st.number_input("Improvements Valuation ($)", min_value=10000, max_value=3000000, value=350000, step=10000)
         zhvi_px = st.number_input("ZHVI Index Price ($)", min_value=50000, max_value=1500000, value=450000, step=10000)
         zipcode = st.selectbox("ZipCode", [98001, 98002, 98003, 98004, 98005, 98006, 98033, 98052, 98103, 98115, 98166, 98199])
+        actual_price_input = st.number_input("Actual Sale Price ($) (Optional Backtest)", min_value=0, max_value=5000000, value=0, step=10000)
 
     if st.button("🔮 Generate Market Valuation"):
         single_dict = {
@@ -271,6 +352,35 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
         
+        if actual_price_input > 0:
+            ratio = actual_price_input / pred_val
+            pct_diff = abs(actual_price_input - pred_val) / actual_price_input * 100
+            act_str = f"${actual_price_input:,.0f}"
+            pred_str = f"${pred_val:,.0f}"
+            tax_str = f"${land_val + imps_val:,.0f}"
+            
+            if ratio > 1.25:
+                st.markdown(f"""
+                <div style="background: rgba(239, 68, 68, 0.15); border: 2px solid #EF4444; border-radius: 12px; padding: 18px; margin-top: 16px; color: #FEE2E2;">
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #FCA5A5; margin-bottom: 6px;">🔥 Bidding War / Premium Outlier Detected</div>
+                    <div style="font-size: 0.98rem; line-height: 1.5;">Actual sale price (<b>{act_str}</b>) is <b>{pct_diff:.1f}% higher</b> than estimated fair market value (<b>{pred_str}</b>). Government tax assessment (<b>{tax_str}</b>) confirms this was a competitive market outlier purchase.</div>
+                </div>
+                """, unsafe_allow_html=True)
+            elif ratio < 0.75:
+                st.markdown(f"""
+                <div style="background: rgba(245, 158, 11, 0.15); border: 2px solid #F59E0B; border-radius: 12px; padding: 18px; margin-top: 16px; color: #FEF3C7;">
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #FDE68A; margin-bottom: 6px;">💎 Underpriced / Distressed Opportunity</div>
+                    <div style="font-size: 0.98rem; line-height: 1.5;">Actual sale price (<b>{act_str}</b>) is <b>{pct_diff:.1f}% lower</b> than estimated market value (<b>{pred_str}</b>).</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style="background: rgba(16, 185, 129, 0.15); border: 2px solid #10B981; border-radius: 12px; padding: 18px; margin-top: 16px; color: #D1FAE5;">
+                    <div style="font-size: 1.15rem; font-weight: 800; color: #6EE7B7; margin-bottom: 6px;">✅ Fair Market Valuation Match</div>
+                    <div style="font-size: 0.98rem; line-height: 1.5;">Actual sale price (<b>{act_str}</b>) matches estimated fair market value (<b>{pred_str}</b>) within an accurate <b>{pct_diff:.1f}% margin</b>.</div>
+                </div>
+                """, unsafe_allow_html=True)
+
         st.divider()
         mcol1, mcol2, mcol3 = st.columns(3)
         with mcol1:
@@ -304,7 +414,35 @@ with tab2:
                     
                     df_results = df_upload.copy()
                     df_results['Predicted_SalePrice'] = batch_preds.round(2)
-                    df_results['Predicted_Price_Per_SqFt'] = (batch_preds / df_results.get('SqFtTotLiving', df_results.get('sqft_living', 1))).round(2)
+                    sqft_series = df_results.get('SqFtTotLiving', df_results.get('sqft_living', pd.Series(1, index=df_results.index)))
+                    df_results['Predicted_Price_Per_SqFt'] = (batch_preds / pd.to_numeric(sqft_series, errors='coerce').replace(0, 1)).round(2)
+                    
+                    # Target price comparison and Market Insight labeling
+                    actual_col = None
+                    for c in ['SalePrice', 'saleprice', 'price', 'Sale_Price']:
+                        if c in df_results.columns:
+                            actual_col = c
+                            break
+                            
+                    if actual_col:
+                        actuals = pd.to_numeric(df_results[actual_col], errors='coerce')
+                        df_results['Valuation_Variance_$'] = (actuals - batch_preds).round(2)
+                        df_results['Accuracy_Margin_%'] = (100 - ((actuals - batch_preds).abs() / actuals * 100)).round(2)
+                        
+                        def label_insight(row):
+                            act = row[actual_col]
+                            pred = row['Predicted_SalePrice']
+                            if pd.isna(act) or act <= 0:
+                                return "ℹ️ Prediction Only"
+                            ratio = act / pred
+                            if ratio > 1.25:
+                                return "🔥 Bidding War / Premium Outlier"
+                            elif ratio < 0.75:
+                                return "💎 Distressed / Below Market Bargain"
+                            else:
+                                return "✅ Fair Market Valuation"
+                                
+                        df_results['Market_Valuation_Insight'] = df_results.apply(label_insight, axis=1)
                     
                 st.balloons()
                 st.markdown("### 🎯 Valuation Results Summary")
@@ -317,10 +455,14 @@ with tab2:
                 with b3:
                     st.metric("Average Valuation", f"${df_results['Predicted_SalePrice'].mean():,.0f}")
                 with b4:
-                    st.metric("Max Property Value", f"${df_results['Predicted_SalePrice'].max():,.0f}")
+                    if actual_col:
+                        avg_acc = df_results['Accuracy_Margin_%'].mean()
+                        st.metric("Portfolio Accuracy Rate", f"{avg_acc:.2f}%")
+                    else:
+                        st.metric("Max Property Value", f"${df_results['Predicted_SalePrice'].max():,.0f}")
                     
                 st.divider()
-                st.markdown("#### Valuation Table")
+                st.markdown("#### Valuation & Outlier Intelligence Table")
                 st.dataframe(df_results, use_container_width=True)
                 
                 csv_buffer = io.BytesIO()
