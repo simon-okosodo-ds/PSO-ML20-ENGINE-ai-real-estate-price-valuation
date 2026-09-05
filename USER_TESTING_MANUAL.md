@@ -6,7 +6,7 @@ This guide provides step-by-step instructions for testing the **PSO-ML20 Real Es
 
 ## 🌐 Quick Access Links
 
-- **Live Production App:** [https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)
+- **Live Production App:** [https://pso-ml20-engine-ai-real-estate-price-valuation-mz9pafrf3y8vvts.streamlit.app/](https://pso-ml20-engine-ai-real-estate-price-valuation-mz9pafrf3y8vvts.streamlit.app/)
 - **GitHub Repository:** [https://github.com/simon-okosodo-ds/PSO-ML20-ENGINE-ai-real-estate-price-valuation](https://github.com/simon-okosodo-ds/PSO-ML20-ENGINE-ai-real-estate-price-valuation)
 - **Local Live Web App:** [http://localhost:8501](http://localhost:8501)
 

@@ -1,13 +1,13 @@
 # 🏠 Enterprise Real Estate Automated Valuation System (AVM) & Web App
 
-[![Live App Demo](https://img.shields.io/badge/🚀%20Live%20App-Streamlit%20Cloud-FF4B4B.svg)](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)
+[![Live App Demo](https://img.shields.io/badge/🚀%20Live%20App-Streamlit%20Cloud-FF4B4B.svg)](https://pso-ml20-engine-ai-real-estate-price-valuation-mz9pafrf3y8vvts.streamlit.app/)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-FF4B4B.svg)](https://streamlit.io/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.4%2B-F7931E.svg)](https://scikit-learn.org/)
 [![R2 Accuracy](https://img.shields.io/badge/Model%20R%C2%B2-88.16%25-10B981.svg)](https://github.com/simon-okosodo-ds/PSO-ML20-ENGINE-ai-real-estate-price-valuation)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> 🌐 **Live Web Application Demo:** [https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)
+> 🌐 **Live Web Application Demo:** [https://pso-ml20-engine-ai-real-estate-price-valuation-mz9pafrf3y8vvts.streamlit.app/](https://pso-ml20-engine-ai-real-estate-price-valuation-mz9pafrf3y8vvts.streamlit.app/)
 
 An enterprise-grade **Real Estate Automated Valuation System (AVM)** powered by an advanced Gradient Boosting Machine Learning ensemble (`LightGBM`, `XGBoost`, `CatBoost`). Built with automated feature engineering, target log-transformations, automated market outlier intelligence, dynamic schema adaptation, batch CSV prediction exports, and an executive dark-mode glassmorphism interface.
 
@@ -134,7 +134,7 @@ Deploy live to the web for free via [Streamlit Community Cloud](https://share.st
 
 - **Geographic & Property Coverage:** Model is trained on 21,000+ historical sales records from King County, Washington (Seattle Metro Area, ZipCodes 98001–98199). It is optimized for single-family residential homes and townhomes; commercial properties, vacant land, and multi-family complexes (>4 units) are outside training distribution.
 - **Outlier Detection Methodology:** Market anomaly classification (bidding wars vs. distressed sales) is a domain-heuristic intelligence layer. It objectively cross-references model predictions against independent government tax assessments (`LandVal + ImpsVal`) and ZipCode median indexes (`ZHVI`) at a $\pm 25\%$ variance boundary.
-- **Deployment Status:** Live production interactive demo hosted on Streamlit Cloud ([Live Demo App](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)). Built as a functional portfolio prototype demonstrating automated feature engineering, ensemble modeling, dynamic schema adaptation, and cloud deployment.
+- **Deployment Status:** Live production interactive demo hosted on Streamlit Cloud ([Live Demo App](https://pso-ml20-engine-ai-real-estate-price-valuation-mz9pafrf3y8vvts.streamlit.app/)). Built as a functional portfolio prototype demonstrating automated feature engineering, ensemble modeling, dynamic schema adaptation, and cloud deployment.
 
 ---
 
