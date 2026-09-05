@@ -6,9 +6,9 @@ This guide provides step-by-step instructions for testing the **PSO-ML20 Real Es
 
 ## 🌐 Quick Access Links
 
+- **Live Production App:** [https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)
+- **GitHub Repository:** [https://github.com/simon-okosodo-ds/ai-enterprise-real-estate-avm-engine](https://github.com/simon-okosodo-ds/ai-enterprise-real-estate-avm-engine)
 - **Local Live Web App:** [http://localhost:8501](http://localhost:8501)
-- **GitHub Repository:** [https://github.com/simon-okosodo-ds/Pso-ml20-interfaces](https://github.com/simon-okosodo-ds/Pso-ml20-interfaces)
-- **Public Cloud Deployment:** [Streamlit Community Cloud](https://share.streamlit.io/) *(Repository: `simon-okosodo-ds/Pso-ml20-interfaces`, Main file: `app.py`)*
 
 ---
 

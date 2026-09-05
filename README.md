@@ -1,13 +1,15 @@
-# 🏠 PSO-ML20 Industrial House Price Valuation Engine & Web UI
+# 🏠 Enterprise Real Estate Automated Valuation System (AVM) & Web App
 
+[![Live App Demo](https://img.shields.io/badge/🚀%20Live%20App-Streamlit%20Cloud-FF4B4B.svg)](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.32%2B-FF4B4B.svg)](https://streamlit.io/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.4%2B-F7931E.svg)](https://scikit-learn.org/)
-[![CatBoost](https://img.shields.io/badge/CatBoost-1.2%2B-FFCC00.svg)](https://catboost.ai/)
-[![R2 Accuracy](https://img.shields.io/badge/Model%20R%C2%B2-88.82%25-10B981.svg)](https://github.com/simon-okosodo-ds/Pso-ml20-interfaces)
+[![R2 Accuracy](https://img.shields.io/badge/Model%20R%C2%B2-88.16%25-10B981.svg)](https://github.com/simon-okosodo-ds/ai-enterprise-real-estate-avm-engine)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-An enterprise-grade **Real Estate Automated Valuation System (AVM)** powered by an advanced Gradient Boosting Machine Learning ensemble (`CatBoost`, `XGBoost`, `LightGBM`). Built with automated feature engineering, target log-transformations, automated market outlier intelligence, dynamic schema adaptation, batch CSV prediction exports, and an executive dark-mode glassmorphism interface.
+> 🌐 **Live Web Application Demo:** [https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/](https://pso-ml20-engine-ai-enterprise-real-estate-avm-qkhgc3rq2svwt7ya.streamlit.app/)
+
+An enterprise-grade **Real Estate Automated Valuation System (AVM)** powered by an advanced Gradient Boosting Machine Learning ensemble (`LightGBM`, `XGBoost`, `CatBoost`). Built with automated feature engineering, target log-transformations, automated market outlier intelligence, dynamic schema adaptation, batch CSV prediction exports, and an executive dark-mode glassmorphism interface.
 
 ---
 
