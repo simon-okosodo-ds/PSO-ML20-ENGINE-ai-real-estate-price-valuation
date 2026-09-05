@@ -498,9 +498,9 @@ with tab3:
     st.write("Direct benchmark audition performance metrics from your research notebook:")
     
     leaderboard_df = pd.DataFrame([
-        {"MODEL": "LightGBM_Reg", "R2 (ACCURACY)": "0.8813", "MAE (ERROR $)": "$45,242", "RMSE": "$69,510", "MAPE (%)": "10.82%", "STATUS": "🥇 CHAMPION"},
-        {"MODEL": "XGBoost_Reg", "R2 (ACCURACY)": "0.8811", "MAE (ERROR $)": "$44,860", "RMSE": "$69,567", "MAPE (%)": "10.78%", "STATUS": "🥈 RUNNER UP"},
-        {"MODEL": "CatBoost_Reg", "R2 (ACCURACY)": "0.8796", "MAE (ERROR $)": "$45,487", "RMSE": "$70,012", "MAPE (%)": "10.89%", "STATUS": "🥉 TOP FINALIST"}
+        {"MODEL": "LightGBM_Reg", "R2 (ACCURACY)": "0.8816", "MAE (ERROR $)": "$45,189", "RMSE": "$69,419", "MAPE (%)": "10.81%", "STATUS": "🥇 CHAMPION"},
+        {"MODEL": "XGBoost_Reg", "R2 (ACCURACY)": "0.8812", "MAE (ERROR $)": "$44,969", "RMSE": "$69,525", "MAPE (%)": "10.76%", "STATUS": "🥈 RUNNER UP"},
+        {"MODEL": "CatBoost_Reg", "R2 (ACCURACY)": "0.8799", "MAE (ERROR $)": "$45,318", "RMSE": "$69,916", "MAPE (%)": "10.87%", "STATUS": "🥉 TOP FINALIST"}
     ])
     
     st.table(leaderboard_df)

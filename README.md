@@ -15,9 +15,9 @@ An enterprise-grade **Real Estate Automated Valuation System (AVM)** powered by 
 
 | MODEL | R² SCORE (ACCURACY) | MAE (MEAN ABS ERROR) | RMSE | MAPE (%) | STATUS |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **CatBoost / LightGBM Ensemble** | **`0.8882` (88.82%)** | **`$51,055`** | **`$83,212`** | **`10.83%`** | 🥇 **CERTIFIED ELITE** |
-| **XGBoost Regressor** | `0.8811` (88.11%) | `$44,860` | `$69,567` | `10.78%` | 🥈 **RUNNER UP** |
-| **LightGBM Regressor** | `0.8813` (88.13%) | `$45,242` | `$69,510` | `10.82%` | 🥉 **FINALIST** |
+| **LightGBM Regressor** | **`0.8816` (88.16%)** | **`$45,189`** | **`$69,419`** | **`10.81%`** | 🥇 **CHAMPION** |
+| **XGBoost Regressor** | `0.8812` (88.12%) | `$44,969` | `$69,525` | `10.76%` | 🥈 **RUNNER UP** |
+| **CatBoost Regressor** | `0.8799` (87.99%) | `$45,318` | `$69,916` | `10.87%` | 🥉 **FINALIST** |
 
 ---
 

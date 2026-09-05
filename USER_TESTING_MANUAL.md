@@ -47,9 +47,9 @@ This guide provides step-by-step instructions for testing the **PSO-ML20 Real Es
 ### Test 3: Championship Leaderboard & Integrity Certificate (Tab 3)
 1. Click on **`🏆 Championship Leaderboard`** (Tab 3).
 2. Review the model benchmark table:
-   - 🥇 **LightGBM_Reg**: R² Accuracy `0.8813` (88.13%), MAE `$45,242`.
-   - 🥈 **XGBoost_Reg**: R² Accuracy `0.8811` (88.11%), MAE `$44,860`.
-   - 🥉 **CatBoost_Reg**: R² Accuracy `0.8796` (87.96%), MAE `$45,487`.
+   - 🥇 **LightGBM_Reg**: R² Accuracy `0.8816` (88.16%), MAE `$45,189`, RMSE `$69,419`, MAPE `10.81%`.
+   - 🥈 **XGBoost_Reg**: R² Accuracy `0.8812` (88.12%), MAE `$44,969`, RMSE `$69,525`, MAPE `10.76%`.
+   - 🥉 **CatBoost_Reg**: R² Accuracy `0.8799` (87.99%), MAE `$45,318`, RMSE `$69,916`, MAPE `10.87%`.
 3. Check the **System Integrity & Stability Audit** table and **Strategic Signal Hierarchy** chart.
 
 ---
